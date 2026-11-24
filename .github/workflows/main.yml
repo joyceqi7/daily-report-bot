@@ -1,0 +1,35 @@
+name: Daily Email Bot
+
+on:
+  schedule:
+    # 每天北京时间 09:00
+    - cron: '23 22 * * *'  # 对应北京时间 06:23
+  # 允许手动触发测试
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      # 👇 确保包含 youtube-search-python
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests markdown feedparser schedule beautifulsoup4 lxml youtube-search-python
+
+    - name: Run bot
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        MAIL_USER: ${{ secrets.MAIL_USER }}
+        MAIL_PASS: ${{ secrets.MAIL_PASS }}
+        MAIL_TO: ${{ secrets.MAIL_TO }}
+      run: python cloud_bot.py
